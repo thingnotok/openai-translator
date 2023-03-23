@@ -397,20 +397,17 @@ export function PopupCard(props: IPopupCardProps) {
     }, [selectedWord])
 
     const [translateMode, setTranslateMode] = useState<string>('Ask')
-    const [pre_translateMode, set_pre_TranslateMode] = useState<string>('Ask')
     const [cmdbar, setCmdbar] = useState<any[]>()
     useEffect(() => {
         ;(async () => {
             const settings = await getSettings()
             setTranslateMode(settings.defaultTranslateMode)
-            set_pre_TranslateMode(settings.defaultTranslateMode)
         })()
     }, [])
     useEffect(() => {
         ;(async () => {
             const settings = await getSettings()
             setTranslateMode(settings.defaultTranslateMode)
-            set_pre_TranslateMode(settings.defaultTranslateMode)
         })()
     }, [])
    
@@ -790,10 +787,6 @@ export function PopupCard(props: IPopupCardProps) {
             })
         })()
     }, [])
-    useEffect(() => {
-        console.log("Set trans")
-        setTranslateMode(pre_translateMode)
-    }, [pre_translateMode])
 
     const onDrop = async (acceptedFiles: File[]) => {
         const worker = createWorker({
@@ -845,10 +838,7 @@ export function PopupCard(props: IPopupCardProps) {
                                 size='mini'
                                 kind={translateMode === name ? 'primary': 'secondary'}
                                 onClick={() => {
-                                    console.log(name)
-                                    console.log(pre_translateMode)
-                                    console.log(translateMode)
-                                    set_pre_TranslateMode(name)
+                                    setTranslateMode(name)
                                     }}>
                                 {name}
                             </Button>
