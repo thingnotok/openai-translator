@@ -52,7 +52,7 @@ export async function translate(query: TranslateQuery) {
         /\{toLanguage\}/, lang.langMap.get(query.detectTo) || query.detectTo)
     systemPrompt = systemPrompt.replace(
         /\{fromLanguage\}/, lang.langMap.get(query.detectFrom) || query.detectFrom)
-    let usr = `My Request is: [${query.text}]\n`
+    let usr = `\n${query.text}\n`
     if(assistantPrompt.length > 0)
         usr += `${assistantPrompt}`
     const msg = [{role: 'system', content: systemPrompt}, { role: 'user', content: `"${usr}"` }]
@@ -90,6 +90,8 @@ export async function translate(query: TranslateQuery) {
 
     let isFirst = true
 
+    query.onMessage({ content: "# H1 \n ## H2\n", role:""})
+    return ""
     await fetchSSE(`${settings.apiURL}${settings.apiURLPath}`, {
         method: 'POST',
         headers,

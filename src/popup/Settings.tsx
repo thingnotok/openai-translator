@@ -101,7 +101,6 @@ interface IProviderSelectorProps {
 function TranslateModeSelector(props: ITranslateModeSelectorProps) {
     const opts = props.actions.map((action) => 
         ({label:utils.getName(action), id:utils.getName(action)}))
-    opts.push({label:'', id:''})
     const { t } = useTranslation()
             
     return <Select
@@ -111,7 +110,7 @@ function TranslateModeSelector(props: ITranslateModeSelectorProps) {
     clearable={false}
     value={props.value && {id: props.value}}
     onChange={(params) => {
-        props.onChange?.(params.value[0].id as string | 'nop')
+        props.onChange?.(params.value[0].id as string)
     }}
     options={opts}
 />

@@ -206,7 +206,7 @@ const useStyles = createUseStyles({
         flexDirection: 'row',
         alignItems: 'center',
         // gap: '10px',
-        'padding': '0 0 0 0',
+        'padding': '0 5px 0 0',
     },
     'popupCardEditorContainer': {
         display: 'flex',
@@ -396,53 +396,24 @@ export function PopupCard(props: IPopupCardProps) {
         highlightRef.current.handleInput()
     }, [selectedWord])
 
-    const [translateMode, setTranslateMode] = useState<string>('')
+    const [translateMode, setTranslateMode] = useState<string>('Ask')
+    const [pre_translateMode, set_pre_TranslateMode] = useState<string>('Ask')
+    const [cmdbar, setCmdbar] = useState<any[]>()
     useEffect(() => {
         ;(async () => {
             const settings = await getSettings()
-            if (settings.defaultTranslateMode !== 'nop') {
-                setTranslateMode(settings.defaultTranslateMode)
-            }
+            setTranslateMode(settings.defaultTranslateMode)
+            set_pre_TranslateMode(settings.defaultTranslateMode)
         })()
     }, [])
-    const isTranslate = translateMode === 'translate'
     useEffect(() => {
-        if (!isTranslate) {
-            setSelectedWord('')
-            return undefined
-        }
-        const editor = editorRef.current
-        if (!editor) {
-            return undefined
-        }
-        const onCompositionStart = () => {
-            isCompositing.current = true
-        }
-        const onCompositionEnd = () => {
-            isCompositing.current = false
-        }
-        const onMouseUp = () => {
-            const selectedWord_ = editor.value.substring(editor.selectionStart, editor.selectionEnd).trim()
-            setSelectedWord(selectedWord_)
-        }
-        const onBlur = () => {
-            const selectedWord_ = editor.value.substring(editor.selectionStart, editor.selectionEnd).trim()
-            setSelectedWord(selectedWord_)
-        }
-
-        editor.addEventListener('compositionstart', onCompositionStart)
-        editor.addEventListener('compositionend', onCompositionEnd)
-        editor.addEventListener('mouseup', onMouseUp)
-        editor.addEventListener('blur', onBlur)
-
-        return () => {
-            editor.removeEventListener('compositionstart', onCompositionStart)
-            editor.removeEventListener('compositionend', onCompositionEnd)
-            editor.removeEventListener('mouseup', onMouseUp)
-            editor.removeEventListener('blur', onBlur)
-        }
-    }, [isTranslate])
-
+        ;(async () => {
+            const settings = await getSettings()
+            setTranslateMode(settings.defaultTranslateMode)
+            set_pre_TranslateMode(settings.defaultTranslateMode)
+        })()
+    }, [])
+   
     const { theme, themeType } = useTheme()
 
     const styles = useStyles({ theme, themeType, isDesktopApp: isDesktopApp() })
@@ -476,7 +447,7 @@ export function PopupCard(props: IPopupCardProps) {
     const [detectTo, setDetectTo] = useState('')
     const stopAutomaticallyChangeDetectTo = useRef(false)
     useEffect(() => {
-        ;(async () => {
+        (async () => {
             const settings = await getSettings()
             const actIdx = utils.lookupAction(settings.actions, translateMode)
             setAugmentPrompt(utils.getAssistantPrompt(settings.actions[actIdx]))
@@ -674,13 +645,6 @@ export function PopupCard(props: IPopupCardProps) {
                 }
             }
             beforeTranslate()
-            const cachedKey = `translate:${translateMode}:${detectFrom}:${detectTo}:${text}:${selectedWord}`
-            const cachedValue = cache.get(cachedKey)
-            if (cachedValue) {
-                afterTranslate('stop')
-                setTranslatedText(cachedValue as string)
-                return
-            }
             let isStopped = false
             try {
                 await translate({
@@ -709,7 +673,6 @@ export function PopupCard(props: IPopupCardProps) {
                             ) {
                                 result = translatedText.slice(0, -1)
                             }
-                            cache.set(cachedKey, result)
                             return result
                         })
                     },
@@ -736,15 +699,6 @@ export function PopupCard(props: IPopupCardProps) {
         },
         [translateMode, detectFrom, detectTo]
     )
-
-    useEffect(() => {
-        const controller = new AbortController()
-        const { signal } = controller
-        translateText(originalText, "", "", signal)
-        return () => {
-            controller.abort()
-        }
-    }, [translateText, originalText, translationFlag])
 
     const handleSpeakDone = () => {
         setIsSpeakingEditableText(false)
@@ -836,6 +790,10 @@ export function PopupCard(props: IPopupCardProps) {
             })
         })()
     }, [])
+    useEffect(() => {
+        console.log("Set trans")
+        setTranslateMode(pre_translateMode)
+    }, [pre_translateMode])
 
     const onDrop = async (acceptedFiles: File[]) => {
         const worker = createWorker({
@@ -876,7 +834,7 @@ export function PopupCard(props: IPopupCardProps) {
     useEffect(() => {
         (async () => {
             const settings = await getSettings()
-            props.actionButtons = settings.actions.map((action)=>{
+            const newcmd = settings.actions.map((action)=>{
                 const name = utils.getName(action)
                 return <StatefulTooltip
                             content={name}
@@ -885,14 +843,20 @@ export function PopupCard(props: IPopupCardProps) {
                             <Button
                                 variant="text"
                                 size='mini'
-                                kind={translateMode === name ? 'primary' : 'secondary'}
-                                onClick={() => {return setTranslateMode(name)}}>
+                                kind={translateMode === name ? 'primary': 'secondary'}
+                                onClick={() => {
+                                    console.log(name)
+                                    console.log(pre_translateMode)
+                                    console.log(translateMode)
+                                    set_pre_TranslateMode(name)
+                                    }}>
                                 {name}
                             </Button>
                         </StatefulTooltip>
             })
+            setCmdbar(newcmd)
         })()
-    }, [props.actionButtons, translateMode])
+    }, [translateMode])
 
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
@@ -932,7 +896,7 @@ export function PopupCard(props: IPopupCardProps) {
                                     </div>
                                 </div>
                                 <div className={styles.popupCardHeaderActionsContainer}>
-                                        {props.actionButtons}
+                                        {cmdbar}
                                 </div>
                                 {/* Augment Textarea */}
                                 <div ref={editorContainerRef} className={styles.popupCardEditorContainer}>
@@ -1144,6 +1108,7 @@ export function PopupCard(props: IPopupCardProps) {
                                                     )}
                                                 </div>
                                             </StatefulTooltip>
+                                            
                                             <StatefulTooltip
                                                 content={t('Copy to clipboard')}
                                                 showArrow
@@ -1170,24 +1135,62 @@ export function PopupCard(props: IPopupCardProps) {
                                     </div>
                                     {originalText !== '' && (
                                         <div className={styles.popupCardTranslatedContainer} dir={translatedLanguageDirection}>
-                                            {actionStr && (
-                                                <div
+                                            {
+                                                isLoading ? (
+                                                    <div
                                                     className={clsx({
                                                         [styles.actionStr]: true,
                                                         [styles.error]: !!errorMessage,
                                                     })}
-                                                >
+                                                    style={{
+                                                        userSelect:'none'
+                                                    }}
+                                                    >
                                                     <div>{actionStr}</div>
-                                                    {isLoading ? (
-                                                        <span className={styles.writing} key={'1'} />
-                                                    ) : errorMessage ? (
-                                                        <span key={'2'}>😢</span>
-                                                    ) : (
-                                                        <span key={'3'}>👍</span>
-                                                    )}
+                                                    <span className={styles.writing} key={'1'} />
                                                 </div>
-                                            )}
-                                            {errorMessage ? (
+                                                ): (
+                                                    errorMessage ? (
+                                                    <div
+                                                        className={clsx({
+                                                            [styles.actionStr]: true,
+                                                            [styles.error]: !!errorMessage,
+                                                        })}
+                                                        style={{
+                                                            userSelect:'none'
+                                                        }}
+                                                        onClick={() => {
+                                                            const controller = new AbortController()
+                                                            const { signal } = controller
+                                                            translateText(originalText, originalAugment, selectedWord, signal)
+                                                        }}
+                                                        >
+                                                    <div>{"Re Genrate 🚀"}</div>
+                                                    <span key={'2'}>😢</span>
+                                                    </div>
+                                                    ) : (
+                                                        <div
+                                                        className={clsx({
+                                                            [styles.actionStr]: true,
+                                                            [styles.error]: !!errorMessage,
+                                                        })}
+                                                        style={{
+                                                            userSelect:'none'
+                                                        }}
+                                                        onClick={() => {
+                                                            const controller = new AbortController()
+                                                            const { signal } = controller
+                                                            translateText(originalText, originalAugment, selectedWord, signal)
+                                                        }}
+                                                        >
+                                                    <div>{"Genrate 🚀"}</div>
+                                                    <span  key={'3'}>🤝</span>
+                                                    </div>
+                                                    ))
+                                            }
+
+                                        
+                                            {errorMessage && (
                                                 <div className={styles.errorMessage}>
                                                     <span>{errorMessage}</span>
                                                     <StatefulTooltip content={t('Retry')} showArrow placement='left'>
@@ -1199,7 +1202,9 @@ export function PopupCard(props: IPopupCardProps) {
                                                         </div>
                                                     </StatefulTooltip>
                                                 </div>
-                                            ) : (
+                                            )}
+                                            
+
                                                 <div
                                                     style={{
                                                         width: '100%',
@@ -1215,10 +1220,7 @@ export function PopupCard(props: IPopupCardProps) {
                                                     </div>
                                                 </div>
 
-                                                    <div
-                                                        ref={actionButtonsRef}
-                                                        className={styles.actionButtonsContainer}
-                                                    >
+                                                    <div ref={actionButtonsRef} className={styles.actionButtonsContainer} >
                                                         <div style={{ marginRight: 'auto' }} />
                                                         <StatefulTooltip
                                                             content={t('Speak')}
@@ -1270,21 +1272,10 @@ export function PopupCard(props: IPopupCardProps) {
                                                                 </CopyToClipboard>
                                                             </div>
                                                         </StatefulTooltip>
-                                                        <StatefulTooltip content='Regenerate' showArrow>
-                                                            <div
-                                                                className={styles.actionButton}
-                                                                onClick={() => {
-                                                                    const controller = new AbortController()
-                                                                    const { signal } = controller
-                                                                    translateText(originalText, originalAugment, selectedWord, signal)
-                                                                }}
-                                                            ><MdAutorenew />
-                                                            </div>
-                                                        </StatefulTooltip>
+                                                        
                                                     </div>
                                                     
                                                 </div>
-                                            )}
                                         </div>
                                     )}
                                 </div>
