@@ -10,7 +10,7 @@ import { createUseStyles } from 'react-jss'
 import { AiOutlineTranslation } from 'react-icons/ai'
 import { IoSettingsOutline, IoColorPaletteOutline } from 'react-icons/io5'
 import { TbArrowsExchange } from 'react-icons/tb'
-import { MdOutlineSummarize, MdOutlineAnalytics, MdCode } from 'react-icons/md'
+import { MdAutorenew} from 'react-icons/md'
 import { StatefulTooltip } from 'baseui-sd/tooltip'
 import { detectLang, supportLanguages } from './lang'
 import { translate, TranslateMode } from './translate'
@@ -165,6 +165,7 @@ const useStyles = createUseStyles({
         },
     }),
     'popupCardHeaderActionsContainer': (props: IThemedStyleProps) => ({
+        'paddingTop': props.isDesktopApp ? '45px' : undefined,
         'display': 'flex',
         'flexShrink': 0,
         'flexDirection': 'row',
@@ -194,7 +195,7 @@ const useStyles = createUseStyles({
         flexShrink: 0,
     },
     'popupCardContentContainer': (props: IThemedStyleProps) => ({
-        paddingTop: props.isDesktopApp ? '52px' : undefined,
+        paddingTop: props.isDesktopApp ? '0px' : undefined,
         display: 'flex',
         flexDirection: 'column',
     }),
@@ -252,6 +253,7 @@ const useStyles = createUseStyles({
         padding: '4px 8px',
         display: 'flex',
         overflowY: 'auto',
+        userSelect: 'text',
         color: props.themeType === 'dark' ? props.theme.colors.contentSecondary : props.theme.colors.contentPrimary,
     }),
     'errorMessage': {
@@ -430,7 +432,7 @@ export function PopupCard(props: IPopupCardProps) {
         highlightRef.current.handleInput()
     }, [selectedWord])
 
-    const [translateMode, setTranslateMode] = useState<TranslateMode | ''>('')
+    const [translateMode, setTranslateMode] = useState<string>('')
     useEffect(() => {
         ;(async () => {
             const settings = await getSettings()
@@ -685,15 +687,12 @@ export function PopupCard(props: IPopupCardProps) {
 
     const translateText = useCallback(
         async (text: string, augment: string, selectedWord: string, signal: AbortSignal) => {
-            if (!text || !detectFrom || !detectTo || !translateMode) {
+            if (!text || !translateMode) {
                 return
             }
-            const actionStrItem = actionStrItems[translateMode]
+            // const actionStrItem = 
             const beforeTranslate = () => {
-                let actionStr = actionStrItem.beforeStr
-                if (translateMode === 'translate' && detectFrom == detectTo) {
-                    actionStr = 'Polishing...'
-                }
+                const actionStr = translateMode + " Executing"
                 setActionStr(actionStr)
                 setTranslatedText('')
                 setErrorMessage('')
@@ -712,10 +711,7 @@ export function PopupCard(props: IPopupCardProps) {
                         setErrorMessage(`${actionStr} failed: ${reason}`)
                     }
                 } else {
-                    let actionStr = actionStrItem.afterStr
-                    if (translateMode === 'translate' && detectFrom == detectTo) {
-                        actionStr = 'Polished'
-                    }
+                    const actionStr = translateMode + " Finished!"
                     setActionStr(actionStr)
                 }
             }
@@ -973,74 +969,11 @@ export function PopupCard(props: IPopupCardProps) {
                                     <div data-tauri-drag-region className={styles.iconContainer}>
                                         <img data-tauri-drag-region className={styles.icon} src={icon} />
                                         <div data-tauri-drag-region className={styles.iconText}>
-                                            OpenAI Translator
-                                        </div>
-                                    </div>
-                                    <div className={styles.popupCardHeaderActionsContainer}>
-                                        <div className={styles.from}>
-                                            <Select
-                                                disabled={translateMode === 'explain-code'}
-                                                size='mini'
-                                                clearable={false}
-                                                options={langOptions}
-                                                value={[{ id: detectFrom }]}
-                                                overrides={{
-                                                    Root: {
-                                                        style: {
-                                                            minWidth: '110px',
-                                                        },
-                                                    },
-                                                }}
-                                                onChange={({ value }) => {
-                                                    if (value.length > 0) {
-                                                        setDetectFrom(value[0].id as string)
-                                                    } else {
-                                                        setDetectFrom(langOptions[0].id as string)
-                                                    }
-                                                }}
-                                            />
-                                        </div>
-                                        <div
-                                            className={styles.arrow}
-                                            onClick={() => {
-                                                setOriginalText(translatedText)
-                                                setDetectFrom(detectTo)
-                                                setDetectTo(detectFrom)
-                                            }}
-                                        >
-                                            <StatefulTooltip content='Exchange' placement='top' showArrow>
-                                                <div>
-                                                    <TbArrowsExchange />
-                                                </div>
-                                            </StatefulTooltip>
-                                        </div>
-                                        <div className={styles.to}>
-                                            <Select
-                                                disabled={translateMode === 'polishing'}
-                                                size='mini'
-                                                clearable={false}
-                                                options={langOptions}
-                                                value={[{ id: detectTo }]}
-                                                overrides={{
-                                                    Root: {
-                                                        style: {
-                                                            minWidth: '110px',
-                                                        },
-                                                    },
-                                                }}
-                                                onChange={({ value }) => {
-                                                    stopAutomaticallyChangeDetectTo.current = true
-                                                    if (value.length > 0) {
-                                                        setDetectTo(value[0].id as string)
-                                                    } else {
-                                                        setDetectTo(langOptions[0].id as string)
-                                                    }
-                                                }}
-                                            />
+                                            OpenAI
                                         </div>
                                     </div>
                                 </div>
-                                <div className={styles.popupCardHeaderButtonGroup}>
+                                <div className={styles.popupCardHeaderActionsContainer}>
                                         {props.actionButtons}
                                 </div>
                                 {/* Augment Textarea */}
@@ -1326,64 +1259,75 @@ export function PopupCard(props: IPopupCardProps) {
                                                         }}>                                
                                                         </div>
                                                     </div>
-                                                    {translatedText && (
-                                                        <div
-                                                            ref={actionButtonsRef}
-                                                            className={styles.actionButtonsContainer}
+                                                    
+                                                    <div
+                                                        ref={actionButtonsRef}
+                                                        className={styles.actionButtonsContainer}
+                                                    >
+                                                        <div style={{ marginRight: 'auto' }} />
+                                                        <StatefulTooltip
+                                                            content={t('Speak')}
+                                                            showArrow
+                                                            placement='left'
                                                         >
-                                                            <div style={{ marginRight: 'auto' }} />
-                                                            <StatefulTooltip
-                                                                content={t('Speak')}
-                                                                showArrow
-                                                                placement='left'
+                                                            <div
+                                                                className={styles.actionButton}
+                                                                onClick={() => {
+                                                                    if (isSpeakingTranslatedText) {
+                                                                        speechSynthesis.cancel()
+                                                                        setIsSpeakingTranslatedText(false)
+                                                                        return
+                                                                    }
+                                                                    setIsSpeakingTranslatedText(true)
+                                                                    speak({
+                                                                        text: translatedText,
+                                                                        lang: detectTo,
+                                                                        onFinish: handleSpeakDone,
+                                                                    })
+                                                                }}
                                                             >
-                                                                <div
-                                                                    className={styles.actionButton}
-                                                                    onClick={() => {
-                                                                        if (isSpeakingTranslatedText) {
-                                                                            speechSynthesis.cancel()
-                                                                            setIsSpeakingTranslatedText(false)
-                                                                            return
-                                                                        }
-                                                                        setIsSpeakingTranslatedText(true)
-                                                                        speak({
-                                                                            text: translatedText,
-                                                                            lang: detectTo,
-                                                                            onFinish: handleSpeakDone,
+                                                                {isSpeakingTranslatedText ? (
+                                                                    <SpeakerMotion />
+                                                                ) : (
+                                                                    <RxSpeakerLoud size={13} />
+                                                                )}
+                                                            </div>
+                                                        </StatefulTooltip>
+                                                        <StatefulTooltip
+                                                            content={t('Copy to clipboard')}
+                                                            showArrow
+                                                            placement='left'
+                                                        >
+                                                            <div>
+                                                                <CopyToClipboard
+                                                                    text={translatedText}
+                                                                    onCopy={() => {
+                                                                        toast(t('Copy to clipboard'), {
+                                                                            duration: 3000,
+                                                                            icon: '👏',
                                                                         })
                                                                     }}
+                                                                    options={{ format: 'text/plain' }}
                                                                 >
-                                                                    {isSpeakingTranslatedText ? (
-                                                                        <SpeakerMotion />
-                                                                    ) : (
-                                                                        <RxSpeakerLoud size={13} />
-                                                                    )}
-                                                                </div>
-                                                            </StatefulTooltip>
-                                                            <StatefulTooltip
-                                                                content={t('Copy to clipboard')}
-                                                                showArrow
-                                                                placement='left'
-                                                            >
-                                                                <div>
-                                                                    <CopyToClipboard
-                                                                        text={translatedText}
-                                                                        onCopy={() => {
-                                                                            toast(t('Copy to clipboard'), {
-                                                                                duration: 3000,
-                                                                                icon: '👏',
-                                                                            })
-                                                                        }}
-                                                                        options={{ format: 'text/plain' }}
-                                                                    >
-                                                                        <div className={styles.actionButton}>
-                                                                            <RxCopy size={13} />
-                                                                        </div>
-                                                                    </CopyToClipboard>
-                                                                </div>
-                                                            </StatefulTooltip>
-                                                        </div>
-                                                    )}
+                                                                    <div className={styles.actionButton}>
+                                                                        <RxCopy size={13} />
+                                                                    </div>
+                                                                </CopyToClipboard>
+                                                            </div>
+                                                        </StatefulTooltip>
+                                                        <StatefulTooltip content='Regenerate' showArrow>
+                                                            <div
+                                                                className={styles.actionButton}
+                                                                onClick={() => {
+                                                                    const controller = new AbortController()
+                                                                    const { signal } = controller
+                                                                    translateText(originalText, originalAugment, selectedWord, signal)
+                                                                }}
+                                                            ><MdAutorenew />
+                                                            </div>
+                                                        </StatefulTooltip>
+                                                    </div>
+                                                    
                                                 </div>
                                             )}
                                         </div>
