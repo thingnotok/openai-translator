@@ -99,30 +99,22 @@ interface IProviderSelectorProps {
 }
 
 function TranslateModeSelector(props: ITranslateModeSelectorProps) {
-    let opts = props.actions.map((action) => 
+    const opts = props.actions.map((action) => 
         ({label:utils.getName(action), id:utils.getName(action)}))
     opts.push({label:'', id:''})
     const { t } = useTranslation()
-
-    return (
-        <Select
-            size='compact'
-            onBlur={props.onBlur}
-            searchable={false}
-            clearable={false}
-            value={
-                props.value && [
-                    {
-                        id: props.value,
-                    },
-                ]
-            }
-            onChange={(params) => {
-                props.onChange?.(params.value[0].id as string | 'nop')
-            }}
-            options={opts}
-        />
-    )
+            
+    return <Select
+    size='compact'
+    onBlur={props.onBlur}
+    searchable={false}
+    clearable={false}
+    value={props.value && {id: props.value}}
+    onChange={(params) => {
+        props.onChange?.(params.value[0].id as string | 'nop')
+    }}
+    options={opts}
+/>
 }
 
 interface IThemeTypeSelectorProps {
@@ -691,6 +683,13 @@ export function Settings(props: IPopupProps) {
                                     marginRight: 'auto',
                                 }}
                             />
+                            <Button isLoading={loading} size='compact' onClick={async (e)=>{
+                                const defaultwithAPI = Object.assign({}, defaultSettings)
+                                defaultwithAPI.apiKeys = values.apiKeys
+                                setValues(defaultwithAPI)
+                            }}>
+                                Reset
+                            </Button>
                             <Button isLoading={loading} size='compact'>
                                 {t('Save')}
                             </Button>

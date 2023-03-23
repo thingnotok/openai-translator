@@ -73,15 +73,15 @@ async function build() {
         `./${browserExtensionOutDir}/chromium`
     )
 
-    await zipFolder(`./${browserExtensionOutDir}/chromium`)
+    // await zipFolder(`./${browserExtensionOutDir}/chromium`)
 
-    // firefox
-    await copyFiles(
-        [...commonFiles, { src: 'public/manifest.firefox.json', dst: 'manifest.json' }],
-        `./${browserExtensionOutDir}/firefox`
-    )
+    // // firefox
+    // await copyFiles(
+    //     [...commonFiles, { src: 'public/manifest.firefox.json', dst: 'manifest.json' }],
+    //     `./${browserExtensionOutDir}/firefox`
+    // )
 
-    await zipFolder(`./${browserExtensionOutDir}/firefox`)
+    // await zipFolder(`./${browserExtensionOutDir}/firefox`)
 
     // userscript
     await copyFiles(
