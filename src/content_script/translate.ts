@@ -62,7 +62,7 @@ export async function translate(query: TranslateQuery) {
         /\{toLanguage\}/, lang.langMap.get(query.detectTo) || query.detectTo)
     systemPrompt = systemPrompt.replace(
         /\{fromLanguage\}/, lang.langMap.get(query.detectFrom) || query.detectFrom)
-    let usr = `[${query.text}]\n`
+    let usr = `My Request is: [${query.text}]\n`
     if(assistantPrompt.length > 0)
         usr += `${assistantPrompt}`
     const msg = [{role: 'system', content: systemPrompt}, { role: 'user', content: `"${usr}"` }]

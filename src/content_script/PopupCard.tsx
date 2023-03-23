@@ -37,12 +37,13 @@ import LRUCache from 'lru-cache'
 import { ISettings, IThemedStyleProps } from '../common/types'
 import { useTheme } from '../common/hooks/useTheme'
 import { speak } from '../common/tts'
-const md = require('markdown-it')()
-  .use(require('markdown-it-highlightjs'))
+import * as utils from '../common/utils'
 import 'github-markdown-css/github-markdown.css'
 import 'highlight.js/styles/github.css'
-import * as utils from '../common/utils'
+// import styles from 'inline:./index.css'
 
+const md = require('markdown-it')()
+  .use(require('markdown-it-highlightjs'))
 
 const cache = new LRUCache({
     max: 500,
@@ -200,25 +201,27 @@ const useStyles = createUseStyles({
         flexDirection: 'column',
     }),
     'loadingContainer': {
-        margin: '0 auto',
+        // margin: '0 auto',
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        gap: '10px',
+        // gap: '10px',
+        'padding': '0 0 0 0',
     },
     'popupCardEditorContainer': {
         display: 'flex',
         flexDirection: 'column',
-        padding: '10px',
+        padding: '5px',
+        fontSize: '14px',
     },
     'popupCardTranslatedContainer': (props: IThemedStyleProps) => ({
         'position': 'relative',
         'display': 'flex',
-        'padding': '16px 10px 10px 10px',
+        'padding': '20px 10px 10px 10px',
         'border-top': `1px solid ${props.theme.colors.borderTransparent}`,
-        '-ms-user-select': 'none',
-        '-webkit-user-select': 'none',
-        'user-select': 'none',
+        '-ms-user-select': 'all',
+        '-webkit-user-select': 'all',
+        'user-select': 'all',
     }),
     'actionStr': (props: IThemedStyleProps) => ({
         position: 'absolute',
@@ -229,7 +232,7 @@ const useStyles = createUseStyles({
         top: '0',
         left: '50%',
         transform: 'translateX(-50%) translateY(-50%)',
-        fontSize: '10px',
+        fontSize: '11px',
         padding: '2px 12px',
         borderRadius: '4px',
         background: props.theme.colors.backgroundTertiary,
@@ -266,8 +269,8 @@ const useStyles = createUseStyles({
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        gap: '12px',
-        marginTop: '10px',
+        gap: '15px',
+        marginTop: '0px',
     },
     'actionButton': (props: IThemedStyleProps) => ({
         color: props.theme.colors.contentSecondary,
@@ -319,46 +322,8 @@ const useStyles = createUseStyles({
     'OCRStatusBar': (props: IThemedStyleProps) => ({
         color: props.theme.colors.contentSecondary,
     }),
-    'md':{
-        'max-width': '560px !important',
-    },
 })
 
-function MarkdownRenderer(content:string) {
-
-    const html = md.render(content); // Parse markdown into HTML
-    
-    return <div className='markdown-body' dangerouslySetInnerHTML={{ __html: html }} />; // Render HTML as JSX element
-    
-}
-
-interface IActionStrItem {
-    beforeStr: string
-    afterStr: string
-}
-
-const actionStrItems: Record<TranslateMode, IActionStrItem> = {
-    'analyze': {
-        beforeStr: 'Analyzing...',
-        afterStr: 'Analyzed',
-    },
-    'polishing': {
-        beforeStr: 'Polishing...',
-        afterStr: 'Polished',
-    },
-    'translate': {
-        beforeStr: 'Translating...',
-        afterStr: 'Translated',
-    },
-    'summarize': {
-        beforeStr: 'Summarizing...',
-        afterStr: 'Summarized',
-    },
-    'explain-code': {
-        beforeStr: 'Explaining...',
-        afterStr: 'Explained',
-    },
-}
 
 export interface TesseractResult extends RecognizeResult {
     text: string
@@ -1209,12 +1174,9 @@ export function PopupCard(props: IPopupCardProps) {
                                                 </div>
                                             </StatefulTooltip>
                                         </div>
-                                        </div>
+                                    </div>
                                     {originalText !== '' && (
-                                        <div
-                                            className={styles.popupCardTranslatedContainer}
-                                            dir={translatedLanguageDirection}
-                                        >
+                                        <div className={styles.popupCardTranslatedContainer} dir={translatedLanguageDirection}>
                                             {actionStr && (
                                                 <div
                                                     className={clsx({
@@ -1254,12 +1216,12 @@ export function PopupCard(props: IPopupCardProps) {
                                                         ref={translatedContentRef}
                                                         className={styles.popupCardTranslatedContentContainer}
                                                     >
-                                                        <div className={[styles.md, 'markdown-body'].join(" ")} dangerouslySetInnerHTML={{
-                                                         __html: md.render(translatedText)
-                                                        }}>                                
-                                                        </div>
+                                                    <div className={['md', 'markdown-body'].join(" ")} dangerouslySetInnerHTML={{
+                                                        __html: md.render(translatedText)
+                                                    }}>                                
                                                     </div>
-                                                    
+                                                </div>
+
                                                     <div
                                                         ref={actionButtonsRef}
                                                         className={styles.actionButtonsContainer}

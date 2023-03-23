@@ -11,6 +11,8 @@ import { Client as Styletron } from 'styletron-engine-atomic'
 import { createRoot, Root } from 'react-dom/client'
 import hotkeys from 'hotkeys-js'
 import '../i18n.js'
+import gmstyles from 'inline:../../node_modules/github-markdown-css/github-markdown.css'
+import hlstyles from 'inline:../../node_modules/highlight.js/styles/github.css'
 
 let root: Root | null = null
 const generateId = createGenerateId()
@@ -75,6 +77,13 @@ async function showPopupCard(x: number, y: number, text: string, autoFocus: bool
         $popupCard.style.font =
             '14px/1.6 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji'
         const $container = await getContainer()
+        let $st = document.createElement('style')
+        // const gmstyles_m = gmstyles.replace("font-size: 16px", 'fontSize: small')
+        $st.textContent = gmstyles
+        $container.shadowRoot?.querySelector('div')?.appendChild($st)
+        $st = document.createElement('style')
+        $st.textContent = hlstyles
+        $container.shadowRoot?.querySelector('div')?.appendChild($st)
         $container.shadowRoot?.querySelector('div')?.appendChild($popupCard)
     }
     $popupCard.style.display = 'block'
@@ -162,7 +171,6 @@ async function main() {
     const browser = await utils.getBrowser()
 
     let lastMouseEvent: MouseEvent | undefined
-
     document.addEventListener('mouseup', (event: MouseEvent) => {
         lastMouseEvent = event
         window.setTimeout(async () => {
@@ -198,6 +206,7 @@ async function main() {
     const settings = await utils.getSettings()
 
     await bindHotKey(settings.hotkey)
+
 }
 
 export async function bindHotKey(hotkey_: string | undefined) {
