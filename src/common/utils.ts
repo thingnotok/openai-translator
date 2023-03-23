@@ -25,6 +25,11 @@ const settingKeys: Record<keyof ISettings, number> = {
     apiURLPath: 1,
     apiModel: 1,
     provider: 1,
+    temperature: 1,
+    max_tokens: 1,
+    top_p: 1,
+    frequency_penalty: 1,
+    presence_penalty: 1,
     autoTranslate: 1,
     defaultTranslateMode: 1,
     defaultTargetLanguage: 1,
@@ -34,7 +39,35 @@ const settingKeys: Record<keyof ISettings, number> = {
     themeType: 1,
     i18n: 1,
     restorePreviousPosition: 1,
+    actions: 1
 }
+export const defaultActions = [
+    `[name: 翻譯]
+    [systemPrompt: As an experienced English teacher, your task is to translate a given text and provide part of speech and meaning explanations for difficult words in the text, as well as providing English example sentences. Your response should always be presented in 繁體中文. Please provide clear translations of the content, followed by detailed explanations of each word's part of speech and meaning, using examples where appropriate. Additionally, please include relevant grammar explanations that will help the user better understand how to use these words correctly. Please note that you do not need to repeat my original prompt in your response.]
+    [assistantPrompt: X:{} are the words I'm curious about. Please also explain them.]
+    `,
+    `[name: Polishing]
+[systemPrompt: As an experienced proofreading expert, please revise the following sentences to improve their clarity, conciseness, and coherence. Your revisions should aim to make each sentence easier to understand while retaining its original meaning. Please note that you may need to rearrange or reword parts of the sentence to achieve this goal. You should also pay attention to grammar, punctuation, and spelling errors as you revise.]
+[assistantPrompt: ]
+    `,
+    `[name: Summarize] 
+[systemPrompt: You are a text summarizer, you can only summarize the text, don't interpret it.]
+[assistantPrompt: summarize this text in the most concise language and must use {toLanguage} language!]
+    `,
+    `[name: Analyze] 
+[systemPrompt: You are a translation engine and grammar analyzer.]
+[assistantPrompt: summarize this text in the most concise language and must use {toLanguage}]
+    `,
+    `[name: Explain-code], 
+[systemPrompt: You are a code explanation engine, you can only explain the code, do not interpret or translate it. Also, please report any bugs you find in the code to the author of the code.]
+[assistantPrompt: explain the provided code, regex or script in the most concise language and must use {toLanguage} language! If the content is not code, return an error message. If the code has obvious errors, point them out.]
+    `,
+    `[name: Ask], 
+[systemPrompt: You're an experienced software engineer, your task is to answer my questions. You need to explain the answer and show me step by step how to resolve the given issues.]
+[assistantPrompt: ]
+    `
+]
+
 
 export async function getSettings(): Promise<ISettings> {
     const browser = await getBrowser()
@@ -70,6 +103,9 @@ export async function getSettings(): Promise<ISettings> {
     }
     if (!settings.i18n) {
         settings.i18n = defaulti18n
+    }
+    if (!settings.actions) {
+        settings.actions = defaultActions.slice(0)
     }
     return settings
 }
@@ -115,4 +151,18 @@ export const isDarkMode = async () => {
         return window.matchMedia('(prefers-color-scheme: dark)').matches
     }
     return settings.themeType === 'dark'
+}
+
+
+export function getName(customAction: string){
+    const m = customAction.match(/\[name: (.*?)\]/m)
+    return m ? m[1] : ''
+}
+export function getPrompt(customAction: string){
+    const m = customAction.match(/\[systemPrompt: (.*?)\]/m)
+    return m ? m[1] : ''
+}
+export function getAssistantPrompt(customAction: string){
+    const m = customAction.match(/\[assistantPrompt: (.*?)\]/m)
+    return m ? m[1] : ''
 }

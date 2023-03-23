@@ -42,6 +42,11 @@ export interface ISettings {
     apiURLPath: string
     apiModel: string
     provider: Provider | 'OpenAI'
+    temperature: number,
+    max_tokens: number,
+    top_p: number,
+    frequency_penalty: number,
+    presence_penalty: number,
     autoTranslate: boolean
     defaultTranslateMode: TranslateMode | 'nop'
     defaultTargetLanguage: string
@@ -51,4 +56,5 @@ export interface ISettings {
     themeType?: ThemeType
     i18n?: string
     restorePreviousPosition?: boolean
+    actions: string[]
 }

@@ -25,6 +25,7 @@ import { useThemeType } from '../common/hooks/useThemeType'
 import { IoCloseCircle } from 'react-icons/io5'
 import { useTranslation } from 'react-i18next'
 import AppConfig from '../../package.json'
+import { Textarea } from 'baseui-sd/textarea'
 
 const langOptions: Value = supportLanguages.reduce((acc, [id, label]) => {
     return [
@@ -61,9 +62,10 @@ function LanguageSelector(props: ILanguageSelectorProps) {
 }
 
 interface ITranslateModeSelectorProps {
-    value?: TranslateMode | 'nop'
-    onChange?: (value: TranslateMode | 'nop') => void
+    value?: string
+    onChange?: (value: string) => void
     onBlur?: () => void
+    actions: string[]
 }
 
 interface AlwaysShowIconsCheckboxProps {
@@ -97,6 +99,9 @@ interface IProviderSelectorProps {
 }
 
 function TranslateModeSelector(props: ITranslateModeSelectorProps) {
+    let opts = props.actions.map((action) => 
+        ({label:utils.getName(action), id:utils.getName(action)}))
+    opts.push({label:'', id:''})
     const { t } = useTranslation()
 
     return (
@@ -113,21 +118,9 @@ function TranslateModeSelector(props: ITranslateModeSelectorProps) {
                 ]
             }
             onChange={(params) => {
-                props.onChange?.(params.value[0].id as TranslateMode | 'nop')
+                props.onChange?.(params.value[0].id as string | 'nop')
             }}
-            options={
-                [
-                    { label: t('Translate'), id: 'translate' },
-                    { label: t('Polishing'), id: 'polishing' },
-                    { label: t('Summarize'), id: 'summarize' },
-                    { label: t('Analyze'), id: 'analyze' },
-                    { label: t('Explain Code'), id: 'explain-code' },
-                    { label: t('Nop'), id: 'nop' },
-                ] as {
-                    label: string
-                    id: TranslateMode
-                }[]
-            }
+            options={opts}
         />
     )
 }
@@ -461,6 +454,29 @@ interface IPopupProps {
     onSave?: (oldSettings: ISettings) => void
 }
 
+
+const defaultSettings:ISettings = {
+    apiKeys: '',
+    apiURL: utils.defaultAPIURL,
+    apiURLPath: utils.defaultAPIURLPath,
+    apiModel: utils.defaultAPIModel,
+    provider: utils.defaultProvider,
+    temperature: 0.1,
+    max_tokens: 1000,
+    top_p: 0.1,
+    frequency_penalty: 1,
+    presence_penalty: 1,
+    autoTranslate: utils.defaultAutoTranslate,
+    defaultTranslateMode: 'translate',
+    defaultTargetLanguage: utils.defaultTargetLanguage,
+    alwaysShowIcons: utils.defaultAlwaysShowIcons,
+    hotkey: '',
+    themeType: 'light',
+    i18n: utils.defaulti18n,
+    actions: utils.defaultActions,
+    restorePreviousPosition: false,
+}
+
 export function Settings(props: IPopupProps) {
     const { theme } = useTheme()
     const { setThemeType } = useThemeType()
@@ -468,20 +484,7 @@ export function Settings(props: IPopupProps) {
     const { t } = useTranslation()
 
     const [loading, setLoading] = useState(false)
-    const [values, setValues] = useState<ISettings>({
-        apiKeys: '',
-        apiURL: utils.defaultAPIURL,
-        apiURLPath: utils.defaultAPIURLPath,
-        apiModel: utils.defaultAPIModel,
-        provider: utils.defaultProvider,
-        autoTranslate: utils.defaultAutoTranslate,
-        defaultTranslateMode: 'translate',
-        defaultTargetLanguage: utils.defaultTargetLanguage,
-        alwaysShowIcons: utils.defaultAlwaysShowIcons,
-        hotkey: '',
-        i18n: utils.defaulti18n,
-        restorePreviousPosition: false,
-    })
+    const [values, setValues] = useState<ISettings>(defaultSettings)
     const [prevValues, setPrevValues] = useState<ISettings>(values)
 
     const [form] = useForm()
@@ -527,6 +530,34 @@ export function Settings(props: IPopupProps) {
     const { themeType } = useTheme()
 
     const isDesktopApp = utils.isDesktopApp()
+
+    // Drawing UI Section
+    console.log("before act setup")
+    console.log(values)
+    const actions = values.actions.map((act, idx)=>{
+        const m = act.match(/\[name: (.*?)\]/m)
+        const name = m ? m[1]: "Action Name"
+        return <FormItem name={['actions', idx]} label={name}>
+                    <Textarea size='compact' onBlur={onBlur}/>
+                </FormItem>
+    })
+    const gptSetting = [
+        <FormItem name='temperature' label='temperature'>
+            <Input size='compact' onBlur={onBlur}/>
+        </FormItem>,
+        <FormItem name='max_tokens' label='max_tokens'>
+            <Input size='compact' onBlur={onBlur}/>
+        </FormItem>,
+        <FormItem name='top_p' label='top_p'>
+            <Input size='compact' onBlur={onBlur}/>
+        </FormItem>,
+        <FormItem name='frequency_penalty' label='frequency_penalty'>
+            <Input size='compact' onBlur={onBlur}/>
+        </FormItem>,
+        <FormItem name='presence_penalty' label='presence_penalty'>
+            <Input size='compact' onBlur={onBlur}/>
+        </FormItem>
+    ]
 
     return (
         <div
@@ -589,10 +620,8 @@ export function Settings(props: IPopupProps) {
                         <FormItem name='provider' label={t('Default Service Provider')}>
                             <ProviderSelector />
                         </FormItem>
-                        <FormItem
+                        <FormItem name='apiKeys' label={t('API Key')}
                             required
-                            name='apiKeys'
-                            label={t('API Key')}
                             caption={
                                 <div>
                                     {t('Go to the')}{' '}
@@ -620,8 +649,8 @@ export function Settings(props: IPopupProps) {
                         <FormItem required name='apiURLPath' label={t('API URL Path')}>
                             <Input size='compact' />
                         </FormItem>
-                        <FormItem name='defaultTranslateMode' label={t('Default Translate Mode')}>
-                            <TranslateModeSelector onBlur={onBlur} />
+                        <FormItem name='defaultTranslateMode' label='Default Action'>
+                            <TranslateModeSelector onBlur={onBlur} actions={values.actions}/>
                         </FormItem>
                         <FormItem name='alwaysShowIcons' label={t('Always show icons')}>
                             <AlwaysShowIconsCheckbox onBlur={onBlur} />
@@ -647,6 +676,8 @@ export function Settings(props: IPopupProps) {
                         <FormItem name='ocrHotkey' label={t('OCR Hotkey')}>
                             <HotkeyRecorder onBlur={onBlur} />
                         </FormItem>
+                        {gptSetting}
+                        {actions}
                         <div
                             style={{
                                 display: 'flex',
