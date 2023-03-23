@@ -37,6 +37,10 @@ import LRUCache from 'lru-cache'
 import { ISettings, IThemedStyleProps } from '../common/types'
 import { useTheme } from '../common/hooks/useTheme'
 import { speak } from '../common/tts'
+const md = require('markdown-it')()
+  .use(require('markdown-it-highlightjs'))
+import 'github-markdown-css/github-markdown.css'
+import 'highlight.js/styles/github.css'
 
 const cache = new LRUCache({
     max: 500,
@@ -311,7 +315,18 @@ const useStyles = createUseStyles({
     'OCRStatusBar': (props: IThemedStyleProps) => ({
         color: props.theme.colors.contentSecondary,
     }),
+    'md':{
+        'max-width': '560px !important',
+    },
 })
+
+function MarkdownRenderer(content:string) {
+
+    const html = md.render(content); // Parse markdown into HTML
+    
+    return <div className='markdown-body' dangerouslySetInnerHTML={{ __html: html }} />; // Render HTML as JSX element
+    
+}
 
 interface IActionStrItem {
     beforeStr: string
