@@ -79,7 +79,8 @@ async function showPopupCard(x: number, y: number, text: string, autoFocus: bool
         const $container = await getContainer()
         let $st = document.createElement('style')
         // const gmstyles_m = gmstyles.replace("font-size: 16px", 'fontSize: small')
-        $st.textContent = gmstyles
+        let final = gmstyles + "\n.markdown-body {font-size: 1.5vw; max-width: 560px;}\n .markdown-body table {font-size: 1.2vw}\n"
+        $st.textContent = final
         $container.shadowRoot?.querySelector('div')?.appendChild($st)
         $st = document.createElement('style')
         $st.textContent = hlstyles

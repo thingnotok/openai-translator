@@ -13,7 +13,7 @@ export interface TranslateQuery {
     selectedWord: string
     detectFrom: string
     detectTo: string
-    mode: TranslateMode
+    mode: string
     onMessage: (message: { content: string; role: string }) => void
     onError: (error: string) => void
     onFinish: (reason: string) => void
@@ -27,17 +27,7 @@ export interface TranslateResult {
     error?: string
 }
 
-export function lookupAction(actions: string[], mode:string): number {
-    // console.log("Lookup")
-    if(mode=='')
-        return -1
-    for(let i = 0; i < actions.length; i++) {
-        const m = actions[i].match(/\[name: (.*?)\]/m)
-        const name = m? m[1]: ""
-        if(mode == name) return i
-    }
-    return -1
-}
+
 
 
 export async function translate(query: TranslateQuery) {
@@ -47,7 +37,7 @@ export async function translate(query: TranslateQuery) {
     // let assistantPrompt = `translate from ${lang.langMap.get(query.detectFrom) || query.detectFrom} to ${
     //     lang.langMap.get(query.detectTo) || query.detectTo
     // }`
-    const mode = lookupAction(settings.actions, query.mode)
+    const mode = utils.lookupAction(settings.actions, query.mode)
     if(mode < 0){
         console.log("Bad Command")
         return

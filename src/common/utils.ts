@@ -12,6 +12,18 @@ export const defaultAlwaysShowIcons = true
 
 export const defaulti18n = 'en'
 
+export function lookupAction(actions: string[], mode:string): number {
+    // console.log("Lookup")
+    if(mode=='')
+        return -1
+    for(let i = 0; i < actions.length; i++) {
+        const m = actions[i].match(/\[name: (.*?)\]/m)
+        const name = m? m[1]: ""
+        if(mode == name) return i
+    }
+    return -1
+}
+
 export async function getApiKey(): Promise<string> {
     const settings = await getSettings()
     const apiKeys = (settings.apiKeys ?? '').split(',').map((s) => s.trim())

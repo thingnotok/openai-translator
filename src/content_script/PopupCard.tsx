@@ -351,7 +351,6 @@ export function PopupCard(props: IPopupCardProps) {
     const editorRef = useRef<HTMLTextAreaElement>(null)
     const isCompositing = useRef(false)
     const [selectedWord, setSelectedWord] = useState('')
-
     const highlightRef = useRef<HighlightInTextarea | null>(null)
 
     const { t, i18n } = useTranslation()
@@ -478,17 +477,11 @@ export function PopupCard(props: IPopupCardProps) {
     const stopAutomaticallyChangeDetectTo = useRef(false)
     useEffect(() => {
         ;(async () => {
-            const from = (await detectLang(originalText)) ?? 'en'
-            setDetectFrom(from)
-            if (
-                (translateMode === 'translate' || translateMode === 'analyze') &&
-                !stopAutomaticallyChangeDetectTo.current
-            ) {
-                const settings = await getSettings()
-                setDetectTo(from === 'zh-Hans' || from === 'zh-Hant' ? 'en' : settings.defaultTargetLanguage)
-            }
+            const settings = await getSettings()
+            const actIdx = utils.lookupAction(settings.actions, translateMode)
+            setAugmentPrompt(utils.getAssistantPrompt(settings.actions[actIdx]))
         })()
-    }, [originalText, translateMode])
+    }, [translateMode])
 
     const [actionStr, setActionStr] = useState('')
 
