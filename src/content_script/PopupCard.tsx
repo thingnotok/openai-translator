@@ -781,11 +781,11 @@ export function PopupCard(props: IPopupCardProps) {
     useEffect(() => {
         const controller = new AbortController()
         const { signal } = controller
-        translateText(originalText, selectedWord, signal)
+        translateText(originalText, "", signal)
         return () => {
             controller.abort()
         }
-    }, [translateText, originalText, selectedWord, translationFlag])
+    }, [translateText, originalText, translationFlag])
 
     const handleSpeakDone = () => {
         setIsSpeakingEditableText(false)
