@@ -1043,6 +1043,7 @@ export function PopupCard(props: IPopupCardProps) {
                                 <div className={styles.popupCardHeaderButtonGroup}>
                                         {props.actionButtons}
                                 </div>
+                                {/* Augment Textarea */}
                                 <div ref={editorContainerRef} className={styles.popupCardEditorContainer}>
                                     <Textarea
                                         inputRef={editorRef}
@@ -1079,6 +1080,7 @@ export function PopupCard(props: IPopupCardProps) {
                                         }}
                                     />
                                 </div>
+                                {/* Query Textarea */}
                                 <div className={styles.popupCardContentContainer}>
                                     <div ref={editorContainerRef} className={styles.popupCardEditorContainer}>
                                         <div
@@ -1274,7 +1276,7 @@ export function PopupCard(props: IPopupCardProps) {
                                                 </div>
                                             </StatefulTooltip>
                                         </div>
-                                    </div>
+                                        </div>
                                     {originalText !== '' && (
                                         <div
                                             className={styles.popupCardTranslatedContainer}
@@ -1319,18 +1321,9 @@ export function PopupCard(props: IPopupCardProps) {
                                                         ref={translatedContentRef}
                                                         className={styles.popupCardTranslatedContentContainer}
                                                     >
-                                                        <div>
-                                                            {translatedLines.map((line, i) => {
-                                                                return (
-                                                                    <p className={styles.paragraph} key={`p-${i}`}>
-                                                                        {line}
-                                                                        {isLoading &&
-                                                                            i === translatedLines.length - 1 && (
-                                                                                <span className={styles.caret} />
-                                                                            )}
-                                                                    </p>
-                                                                )
-                                                            })}
+                                                        <div className={[styles.md, 'markdown-body'].join(" ")} dangerouslySetInnerHTML={{
+                                                         __html: md.render(translatedText)
+                                                        }}>                                
                                                         </div>
                                                     </div>
                                                     {translatedText && (
