@@ -9,6 +9,7 @@ export type APIModel = 'gpt-3.5-turbo' | 'gpt-3.5-turbo-0301' | 'gpt-4' | 'gpt-4
 
 export interface TranslateQuery {
     text: string
+    augment: string
     selectedWord: string
     detectFrom: string
     detectTo: string

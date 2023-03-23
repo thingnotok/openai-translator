@@ -41,6 +41,8 @@ const md = require('markdown-it')()
   .use(require('markdown-it-highlightjs'))
 import 'github-markdown-css/github-markdown.css'
 import 'highlight.js/styles/github.css'
+import * as utils from '../common/utils'
+
 
 const cache = new LRUCache({
     max: 500,
@@ -480,6 +482,8 @@ export function PopupCard(props: IPopupCardProps) {
     const styles = useStyles({ theme, themeType, isDesktopApp: isDesktopApp() })
     const [isLoading, setIsLoading] = useState(false)
     const [editableText, setEditableText] = useState(props.text)
+    const [augmentPrompt, setAugmentPrompt] = useState('')
+    const [originalAugment, setOriginalAugment] = useState('')
     const [isSpeakingEditableText, setIsSpeakingEditableText] = useState(false)
     const [originalText, setOriginalText] = useState(props.text)
     const [translatedText, setTranslatedText] = useState('')
@@ -680,7 +684,7 @@ export function PopupCard(props: IPopupCardProps) {
     }, [headerRef])
 
     const translateText = useCallback(
-        async (text: string, selectedWord: string, signal: AbortSignal) => {
+        async (text: string, augment: string, selectedWord: string, signal: AbortSignal) => {
             if (!text || !detectFrom || !detectTo || !translateMode) {
                 return
             }
@@ -727,6 +731,7 @@ export function PopupCard(props: IPopupCardProps) {
             try {
                 await translate({
                     mode: translateMode,
+                    augment: augment,
                     signal,
                     text,
                     selectedWord,
@@ -781,7 +786,7 @@ export function PopupCard(props: IPopupCardProps) {
     useEffect(() => {
         const controller = new AbortController()
         const { signal } = controller
-        translateText(originalText, "", signal)
+        translateText(originalText, "", "", signal)
         return () => {
             controller.abort()
         }
@@ -913,6 +918,27 @@ export function PopupCard(props: IPopupCardProps) {
 
         await (await worker).terminate()
     }
+    // custom action buttons
+    useEffect(() => {
+        (async () => {
+            const settings = await getSettings()
+            props.actionButtons = settings.actions.map((action)=>{
+                const name = utils.getName(action)
+                return <StatefulTooltip
+                            content={name}
+                            placement={isDesktopApp() ? 'bottom' : 'top'}
+                            showArrow>
+                            <Button
+                                variant="text"
+                                size='mini'
+                                kind={translateMode === name ? 'primary' : 'secondary'}
+                                onClick={() => {return setTranslateMode(name)}}>
+                                {name}
+                            </Button>
+                        </StatefulTooltip>
+            })
+        })()
+    }, [props.actionButtons, translateMode])
 
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
@@ -1013,81 +1039,9 @@ export function PopupCard(props: IPopupCardProps) {
                                             />
                                         </div>
                                     </div>
-                                    <div className={styles.popupCardHeaderButtonGroup}>
-                                        <StatefulTooltip
-                                            content={t('Translate')}
-                                            placement={isDesktopApp() ? 'bottom' : 'top'}
-                                            showArrow
-                                        >
-                                            <Button
-                                                size='mini'
-                                                kind={translateMode === 'translate' ? 'primary' : 'secondary'}
-                                                onClick={() => setTranslateMode('translate')}
-                                            >
-                                                <AiOutlineTranslation />
-                                            </Button>
-                                        </StatefulTooltip>
-                                        <StatefulTooltip
-                                            content={t('Polishing')}
-                                            placement={isDesktopApp() ? 'bottom' : 'top'}
-                                            showArrow
-                                        >
-                                            <Button
-                                                size='mini'
-                                                kind={translateMode === 'polishing' ? 'primary' : 'secondary'}
-                                                onClick={() => {
-                                                    setTranslateMode('polishing')
-                                                    setDetectTo(detectFrom)
-                                                }}
-                                            >
-                                                <IoColorPaletteOutline />
-                                            </Button>
-                                        </StatefulTooltip>
-                                        <StatefulTooltip
-                                            content={t('Summarize')}
-                                            placement={isDesktopApp() ? 'bottom' : 'top'}
-                                            showArrow
-                                        >
-                                            <Button
-                                                size='mini'
-                                                kind={translateMode === 'summarize' ? 'primary' : 'secondary'}
-                                                onClick={() => {
-                                                    setTranslateMode('summarize')
-                                                }}
-                                            >
-                                                <MdOutlineSummarize />
-                                            </Button>
-                                        </StatefulTooltip>
-                                        <StatefulTooltip
-                                            content={t('Analyze')}
-                                            placement={isDesktopApp() ? 'bottom' : 'top'}
-                                            showArrow
-                                        >
-                                            <Button
-                                                size='mini'
-                                                kind={translateMode === 'analyze' ? 'primary' : 'secondary'}
-                                                onClick={() => setTranslateMode('analyze')}
-                                            >
-                                                <MdOutlineAnalytics />
-                                            </Button>
-                                        </StatefulTooltip>
-                                        <StatefulTooltip
-                                            content={t('Explain Code')}
-                                            placement={isDesktopApp() ? 'left' : 'top'}
-                                            showArrow
-                                        >
-                                            <Button
-                                                size='mini'
-                                                kind={translateMode === 'explain-code' ? 'primary' : 'secondary'}
-                                                onClick={() => {
-                                                    setTranslateMode('explain-code')
-                                                    // no need to change detectTo
-                                                }}
-                                            >
-                                                <MdCode />
-                                            </Button>
-                                        </StatefulTooltip>
-                                    </div>
+                                </div>
+                                <div className={styles.popupCardHeaderButtonGroup}>
+                                        {props.actionButtons}
                                 </div>
                                 <div className={styles.popupCardContentContainer}>
                                     <div ref={editorContainerRef} className={styles.popupCardEditorContainer}>
