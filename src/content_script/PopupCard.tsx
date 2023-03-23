@@ -1043,6 +1043,42 @@ export function PopupCard(props: IPopupCardProps) {
                                 <div className={styles.popupCardHeaderButtonGroup}>
                                         {props.actionButtons}
                                 </div>
+                                <div ref={editorContainerRef} className={styles.popupCardEditorContainer}>
+                                    <Textarea
+                                        inputRef={editorRef}
+                                        autoFocus={props.autoFocus}
+                                        overrides={{
+                                            Root: {
+                                                style: {
+                                                    width: '100%',
+                                                    borderRadius: '0px',
+                                                },
+                                            },
+                                            Input: {
+                                                style: {
+                                                    padding: '4px 8px',
+                                                    fontFamily: 'inherit',
+                                                },
+                                            },
+                                        }}
+                                        value={augmentPrompt}
+                                        placeholder='additional prompt in this action'
+                                        size='mini'
+                                        resize='vertical'
+                                        rows={Math.max(augmentPrompt.split('\n').length, 1)}
+                                        onChange={(e) => setAugmentPrompt(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                if (!e.shiftKey) {
+                                                    e.preventDefault()
+                                                    setOriginalAugment(augmentPrompt)
+                                                }
+                                                console.log(augmentPrompt)
+                                                console.log(originalAugment)
+                                            }
+                                        }}
+                                    />
+                                </div>
                                 <div className={styles.popupCardContentContainer}>
                                     <div ref={editorContainerRef} className={styles.popupCardEditorContainer}>
                                         <div
