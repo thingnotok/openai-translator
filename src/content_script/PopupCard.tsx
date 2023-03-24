@@ -923,8 +923,6 @@ export function PopupCard(props: IPopupCardProps) {
                                                     e.preventDefault()
                                                     setOriginalAugment(augmentPrompt)
                                                 }
-                                                console.log(augmentPrompt)
-                                                console.log(originalAugment)
                                             }
                                         }}
                                     />
@@ -1021,9 +1019,12 @@ export function PopupCard(props: IPopupCardProps) {
                                                                 if (!e.shiftKey) {
                                                                     e.preventDefault()
                                                                     if (!translateMode) {
-                                                                        setTranslateMode('translate')
+                                                                        setTranslateMode('Ask')
                                                                     }
                                                                     setOriginalText(editableText)
+                                                                    const controller = new AbortController
+                                                                    const { signal } = controller
+                                                                    translateText(editableText, augmentPrompt, selectedWord, signal)
                                                                 }
                                                             }
                                                         }}
