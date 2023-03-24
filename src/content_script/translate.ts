@@ -33,10 +33,6 @@ export interface TranslateResult {
 export async function translate(query: TranslateQuery) {
     const trimFirstQuotation = !query.selectedWord
     const settings = await utils.getSettings()
-    // let systemPrompt = 'You are a translation engine that can only translate text and cannot interpret it.'
-    // let assistantPrompt = `translate from ${lang.langMap.get(query.detectFrom) || query.detectFrom} to ${
-    //     lang.langMap.get(query.detectTo) || query.detectTo
-    // }`
     const mode = utils.lookupAction(settings.actions, query.mode)
     if(mode < 0){
         console.log("Bad Command")
@@ -115,7 +111,6 @@ export async function translate(query: TranslateQuery) {
                 query.onFinish(finishReason)
                 return
             }
-
             let targetTxt = ''
             switch (settings.provider) {
                 case 'OpenAI': {

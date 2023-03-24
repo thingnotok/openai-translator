@@ -346,10 +346,7 @@ export interface MovementXY {
 }
 
 export function PopupCard(props: IPopupCardProps) {
-    const [translationFlag, forceTranslate] = useReducer((x: number) => x + 1, 0)
-
     const editorRef = useRef<HTMLTextAreaElement>(null)
-    const isCompositing = useRef(false)
     const [selectedWord, setSelectedWord] = useState('')
     const highlightRef = useRef<HighlightInTextarea | null>(null)
 
@@ -434,6 +431,7 @@ export function PopupCard(props: IPopupCardProps) {
     const [detectTo, setDetectTo] = useState('')
     const stopAutomaticallyChangeDetectTo = useRef(false)
     const [tm, setTm] = useState(0)
+    const [con, setCon] = useState<any>()
     useEffect(() => {
         (async () => {
 
@@ -608,6 +606,23 @@ export function PopupCard(props: IPopupCardProps) {
         }
     }, [headerRef])
 
+    const afterTranslate = (reason: string) => {
+        stopLoading()
+        if (reason !== 'stop') {
+            if (reason == 'length') {
+                toast(t('Chars Limited'), {
+                    duration: 5000,
+                    icon: '😥',
+                })
+            } else {
+                setActionStr('Error')
+                setErrorMessage(`${actionStr} failed: ${reason}`)
+            }
+        } else {
+            const actionStr = translateMode + " Finished!"
+            setActionStr(actionStr)
+        }
+}
     const translateText = useCallback(
         async (text: string, augment: string, selectedWord: string, signal: AbortSignal) => {
             if (!text || !translateMode) {
@@ -621,23 +636,7 @@ export function PopupCard(props: IPopupCardProps) {
                 setErrorMessage('')
                 startLoading()
             }
-            const afterTranslate = (reason: string) => {
-                stopLoading()
-                if (reason !== 'stop') {
-                    if (reason == 'length') {
-                        toast(t('Chars Limited'), {
-                            duration: 5000,
-                            icon: '😥',
-                        })
-                    } else {
-                        setActionStr('Error')
-                        setErrorMessage(`${actionStr} failed: ${reason}`)
-                    }
-                } else {
-                    const actionStr = translateMode + " Finished!"
-                    setActionStr(actionStr)
-                }
-            }
+            
             beforeTranslate()
             let isStopped = false
             try {
@@ -855,6 +854,7 @@ export function PopupCard(props: IPopupCardProps) {
         onClick={() => {
             const controller = new AbortController()
             const { signal } = controller
+            setCon(controller)
             translateText(originalText, originalAugment, selectedWord, signal)
         }}
         ><div>{"Genrate 🚀"}</div></div>
@@ -862,6 +862,14 @@ export function PopupCard(props: IPopupCardProps) {
             className={clsx({[styles.actionStr]: true,[styles.error]: !!errorMessage,})}
             style={{userSelect:'none'}}>
             <div>{actionStr}</div>
+            <div
+            onClick={(
+                ()=>{
+                    con.abort()
+                    afterTranslate('stop')
+                }
+            )}
+            >{"STOP"}</div>
             <span className={styles.writing} key={'1'} />
         </div>
         setMiddleLine(isLoading ? loading : gen)
@@ -873,14 +881,6 @@ export function PopupCard(props: IPopupCardProps) {
         const content =
             <div className={styles.errorMessage}>
                 <span>{errorMessage}</span>
-                <StatefulTooltip content={t('Retry')} showArrow placement='left'>
-                    <div
-                        onClick={() => forceTranslate()}
-                        className={styles.actionButton}
-                    >
-                        <RxReload size={13} />
-                    </div>
-                </StatefulTooltip>
             </div>
         setErrorSection(errorMessage ? content :<div></div>)
     }, [errorMessage])
@@ -1057,6 +1057,7 @@ export function PopupCard(props: IPopupCardProps) {
                                                                     setOriginalText(editableText)
                                                                     const controller = new AbortController
                                                                     const { signal } = controller
+                                                                    setCon(controller)
                                                                     translateText(editableText, augmentPrompt, selectedWord, signal)
                                                                 }
                                                             }
