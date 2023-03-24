@@ -217,7 +217,7 @@ const useStyles = createUseStyles({
     'popupCardTranslatedContainer': (props: IThemedStyleProps) => ({
         'position': 'relative',
         'display': 'flex',
-        'padding': '20px 10px 10px 10px',
+        'padding': '30px 10px 10px 10px',
         'border-top': `1px solid ${props.theme.colors.borderTransparent}`,
         '-ms-user-select': 'all',
         '-webkit-user-select': 'all',
@@ -831,7 +831,7 @@ export function PopupCard(props: IPopupCardProps) {
                             placement={isDesktopApp() ? 'bottom' : 'top'}
                             showArrow>
                             <Button
-                                variant="text"
+                                // variant="text"
                                 size='mini'
                                 kind={translateMode === name ? 'primary': 'secondary'}
                                 onClick={() => {
@@ -860,16 +860,12 @@ export function PopupCard(props: IPopupCardProps) {
         ><div>{"Genrate 🚀"}</div></div>
         const loading = <div
             className={clsx({[styles.actionStr]: true,[styles.error]: !!errorMessage,})}
-            style={{userSelect:'none'}}>
+            style={{userSelect:'none'}}
+            onClick={(()=>{
+                con.abort()
+                afterTranslate('stop')
+            })}>
             <div>{actionStr}</div>
-            <div
-            onClick={(
-                ()=>{
-                    con.abort()
-                    afterTranslate('stop')
-                }
-            )}
-            >{"STOP"}</div>
             <span className={styles.writing} key={'1'} />
         </div>
         setMiddleLine(isLoading ? loading : gen)
