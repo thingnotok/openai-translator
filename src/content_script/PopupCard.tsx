@@ -38,8 +38,6 @@ import { ISettings, IThemedStyleProps } from '../common/types'
 import { useTheme } from '../common/hooks/useTheme'
 import { speak } from '../common/tts'
 import * as utils from '../common/utils'
-import 'github-markdown-css/github-markdown.css'
-import 'highlight.js/styles/github.css'
 // import styles from 'inline:./index.css'
 
 const md = require('markdown-it')()
@@ -848,9 +846,9 @@ export function PopupCard(props: IPopupCardProps) {
     const [middleLine, setMiddleLine] = useState<any>()
     useEffect(() => {
         const gen = <div className={clsx({[styles.actionStr]: true, [styles.error]: !!errorMessage,})}
-        style={{
-            userSelect:'none'
-        }}
+        style={{userSelect:'none',
+        WebkitUserSelect: 'none',
+        MozUserSelect: 'none'}}
         onClick={() => {
             const controller = new AbortController()
             const { signal } = controller
@@ -860,7 +858,9 @@ export function PopupCard(props: IPopupCardProps) {
         ><div>{"Genrate 🚀"}</div></div>
         const loading = <div
             className={clsx({[styles.actionStr]: true,[styles.error]: !!errorMessage,})}
-            style={{userSelect:'none'}}
+            style={{userSelect:'none',
+                WebkitUserSelect: 'none',
+                MozUserSelect: 'none'}}
             onClick={(()=>{
                 con.abort()
                 afterTranslate('stop')
@@ -869,6 +869,8 @@ export function PopupCard(props: IPopupCardProps) {
             <span className={styles.writing} key={'1'} />
         </div>
         setMiddleLine(isLoading ? loading : gen)
+        if(!isLoading)
+            console.log(translatedText)
     }, [isLoading, actionStr, translateMode, originalText, originalAugment, selectedWord])
     
 

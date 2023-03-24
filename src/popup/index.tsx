@@ -4,6 +4,8 @@ import { PopupCard } from '../content_script/PopupCard'
 import { Client as Styletron } from 'styletron-engine-atomic'
 import '../i18n.js'
 import './index.css'
+import 'github-markdown-css/github-markdown.css'
+import 'highlight.js/styles/github.css'
 
 const engine = new Styletron({
     prefix: '__yetone-openai-translator-styletron-',
