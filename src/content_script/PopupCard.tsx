@@ -398,17 +398,9 @@ export function PopupCard(props: IPopupCardProps) {
 
     const [translateMode, setTranslateMode] = useState<string>('')
     const [cmdbar, setCmdbar] = useState<any[]>()
-    // useEffect(async() => {
-    //     const settings = await getSettings()
-    //     setTranslateMode('Ask')
-    // }, [])
     useEffect(() => {
         ;(async () => {
-            console.log("Current mode")
-            console.log(translateMode)
             const settings = await getSettings()
-            console.log("Set to")
-            console.log(settings.defaultTranslateMode)
             setTranslateMode(settings.defaultTranslateMode)
         })()
     }, [])
@@ -445,14 +437,19 @@ export function PopupCard(props: IPopupCardProps) {
     const [detectFrom, setDetectFrom] = useState('')
     const [detectTo, setDetectTo] = useState('')
     const stopAutomaticallyChangeDetectTo = useRef(false)
+    const [tm, setTm] = useState(0)
     useEffect(() => {
         (async () => {
+
             const settings = await getSettings()
-            console.log("cur_translate mode")
-            console.log(translateMode)
             const actIdx = utils.lookupAction(settings.actions, translateMode)
-            setAugmentPrompt(utils.getAssistantPrompt(settings.actions[actIdx]))
+            if(actIdx > -1)
+                setAugmentPrompt(utils.getAssistantPrompt(settings.actions[actIdx]));
         })()
+    }, [tm])
+
+    useEffect(() => {
+            tm?setTm(0):setTm(1)
     }, [translateMode])
 
     const [actionStr, setActionStr] = useState('')
