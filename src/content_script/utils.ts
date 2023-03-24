@@ -102,7 +102,6 @@ async function backgroundFetch(input: string, options: FetchSSEOptions) {
 }
 
 export async function fetchSSE(input: string, options: FetchSSEOptions) {
-    console.log("on Fetch SSE")
     const { onMessage, onError, ...fetchOptions } = options
 
     if (!isDesktopApp() && !isUserscript() && !location.protocol.includes('extension:')) {
