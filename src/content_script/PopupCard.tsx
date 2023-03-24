@@ -1156,7 +1156,6 @@ export function PopupCard(props: IPopupCardProps) {
                                                         }}
                                                         >
                                                     <div>{"Re Genrate 🚀"}</div>
-                                                    <span key={'2'}>😢</span>
                                                     </div>
                                                     ) : (
                                                         <div
@@ -1174,7 +1173,6 @@ export function PopupCard(props: IPopupCardProps) {
                                                         }}
                                                         >
                                                     <div>{"Genrate 🚀"}</div>
-                                                    <span  key={'3'}>🤝</span>
                                                     </div>
                                                     ))
                                             }
