@@ -415,10 +415,6 @@ export function PopupCard(props: IPopupCardProps) {
     const [isSpeakingEditableText, setIsSpeakingEditableText] = useState(false)
     const [originalText, setOriginalText] = useState(props.text)
     const [translatedText, setTranslatedText] = useState('')
-    const [translatedLines, setTranslatedLines] = useState<string[]>([])
-    useEffect(() => {
-        setTranslatedLines(translatedText.split('\n'))
-    }, [translatedText])
     const [isSpeakingTranslatedText, setIsSpeakingTranslatedText] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
     const startLoading = useCallback(() => {
@@ -443,6 +439,8 @@ export function PopupCard(props: IPopupCardProps) {
 
             const settings = await getSettings()
             const actIdx = utils.lookupAction(settings.actions, translateMode)
+            console.log("tm2")
+            console.log(translateMode)
             if(actIdx > -1)
                 setAugmentPrompt(utils.getAssistantPrompt(settings.actions[actIdx]));
         })()
@@ -732,6 +730,7 @@ export function PopupCard(props: IPopupCardProps) {
         }
     }, [isOCRProcessing])
 
+    //drop
     useEffect(() => {
         if (!isTauri()) {
             return
@@ -848,6 +847,47 @@ export function PopupCard(props: IPopupCardProps) {
             setCmdbar(newcmd)
         })()
     }, [translateMode])
+
+    const [middleLine, setMiddleLine] = useState<any>()
+    useEffect(() => {
+        const gen = <div className={clsx({[styles.actionStr]: true, [styles.error]: !!errorMessage,})}
+        style={{
+            userSelect:'none'
+        }}
+        onClick={() => {
+            const controller = new AbortController()
+            const { signal } = controller
+            console.log("clicked")
+            console.log(translateMode)
+            translateText(originalText, originalAugment, selectedWord, signal)
+        }}
+        ><div>{"Genrate 🚀"}</div></div>
+        const loading = <div
+            className={clsx({[styles.actionStr]: true,[styles.error]: !!errorMessage,})}
+            style={{userSelect:'none'}}>
+            <div>{actionStr}</div>
+            <span className={styles.writing} key={'1'} />
+        </div>
+        setMiddleLine(isLoading ? loading : gen)
+    }, [isLoading, actionStr, translateMode, originalText, originalAugment, selectedWord])
+    
+
+    const [errorSection, setErrorSection] = useState<any>()
+    useEffect(() => {
+        const content =
+            <div className={styles.errorMessage}>
+                <span>{errorMessage}</span>
+                <StatefulTooltip content={t('Retry')} showArrow placement='left'>
+                    <div
+                        onClick={() => forceTranslate()}
+                        className={styles.actionButton}
+                    >
+                        <RxReload size={13} />
+                    </div>
+                </StatefulTooltip>
+            </div>
+        setErrorSection(errorMessage ? content :<div></div>)
+    }, [errorMessage])
 
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
@@ -1127,75 +1167,9 @@ export function PopupCard(props: IPopupCardProps) {
                                     </div>
                                     {originalText !== '' && (
                                         <div className={styles.popupCardTranslatedContainer} dir={translatedLanguageDirection}>
-                                            {
-                                                isLoading ? (
-                                                    <div
-                                                    className={clsx({
-                                                        [styles.actionStr]: true,
-                                                        [styles.error]: !!errorMessage,
-                                                    })}
-                                                    style={{
-                                                        userSelect:'none'
-                                                    }}
-                                                    >
-                                                    <div>{actionStr}</div>
-                                                    <span className={styles.writing} key={'1'} />
-                                                </div>
-                                                ): (
-                                                    errorMessage ? (
-                                                    <div
-                                                        className={clsx({
-                                                            [styles.actionStr]: true,
-                                                            [styles.error]: !!errorMessage,
-                                                        })}
-                                                        style={{
-                                                            userSelect:'none'
-                                                        }}
-                                                        onClick={() => {
-                                                            const controller = new AbortController()
-                                                            const { signal } = controller
-                                                            translateText(originalText, originalAugment, selectedWord, signal)
-                                                        }}
-                                                        >
-                                                    <div>{"ReGenrate 🚀"}</div>
-                                                    </div>
-                                                    ) : (
-                                                        <div
-                                                        className={clsx({
-                                                            [styles.actionStr]: true,
-                                                            [styles.error]: !!errorMessage,
-                                                        })}
-                                                        style={{
-                                                            userSelect:'none'
-                                                        }}
-                                                        onClick={() => {
-                                                            const controller = new AbortController()
-                                                            const { signal } = controller
-                                                            translateText(originalText, originalAugment, selectedWord, signal)
-                                                        }}
-                                                        >
-                                                    <div>{"Genrate 🚀"}</div>
-                                                    </div>
-                                                    ))
-                                            }
-
-                                        
-                                            {errorMessage && (
-                                                <div className={styles.errorMessage}>
-                                                    <span>{errorMessage}</span>
-                                                    <StatefulTooltip content={t('Retry')} showArrow placement='left'>
-                                                        <div
-                                                            onClick={() => forceTranslate()}
-                                                            className={styles.actionButton}
-                                                        >
-                                                            <RxReload size={13} />
-                                                        </div>
-                                                    </StatefulTooltip>
-                                                </div>
-                                            )}
-                                            
-
-                                                <div
+                                            {middleLine}
+                                            {errorSection}
+                                            <div
                                                     style={{
                                                         width: '100%',
                                                     }}
@@ -1265,7 +1239,7 @@ export function PopupCard(props: IPopupCardProps) {
                                                         
                                                     </div>
                                                     
-                                                </div>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
