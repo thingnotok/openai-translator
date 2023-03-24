@@ -90,7 +90,7 @@ export async function translate(query: TranslateQuery) {
 
     let isFirst = true
 
-    query.onMessage({ content: "#### Return\n", role:""})
+    // query.onMessage({ content: "#### Return\n", role:""})
     // return ""
     await fetchSSE(`${settings.apiURL}${settings.apiURLPath}`, {
         method: 'POST',

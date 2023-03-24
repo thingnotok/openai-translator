@@ -1007,7 +1007,7 @@ export function PopupCard(props: IPopupCardProps) {
                                                                 ? props.editorRows
                                                                 : Math.min(
                                                                       Math.max(editableText.split('\n').length, 3),
-                                                                      12
+                                                                      5
                                                                   )
                                                         }
                                                         onChange={(e) => setEditableText(e.target.value)}
