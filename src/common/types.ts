@@ -48,7 +48,7 @@ export interface ISettings {
     frequency_penalty: number,
     presence_penalty: number,
     autoTranslate: boolean
-    defaultTranslateMode: TranslateMode | 'nop'
+    defaultTranslateMode: string
     defaultTargetLanguage: string
     alwaysShowIcons: boolean
     hotkey?: string

@@ -396,17 +396,19 @@ export function PopupCard(props: IPopupCardProps) {
         highlightRef.current.handleInput()
     }, [selectedWord])
 
-    const [translateMode, setTranslateMode] = useState<string>('Ask')
+    const [translateMode, setTranslateMode] = useState<string>('')
     const [cmdbar, setCmdbar] = useState<any[]>()
+    // useEffect(async() => {
+    //     const settings = await getSettings()
+    //     setTranslateMode('Ask')
+    // }, [])
     useEffect(() => {
         ;(async () => {
+            console.log("Current mode")
+            console.log(translateMode)
             const settings = await getSettings()
-            setTranslateMode(settings.defaultTranslateMode)
-        })()
-    }, [])
-    useEffect(() => {
-        ;(async () => {
-            const settings = await getSettings()
+            console.log("Set to")
+            console.log(settings.defaultTranslateMode)
             setTranslateMode(settings.defaultTranslateMode)
         })()
     }, [])
@@ -446,6 +448,8 @@ export function PopupCard(props: IPopupCardProps) {
     useEffect(() => {
         (async () => {
             const settings = await getSettings()
+            console.log("cur_translate mode")
+            console.log(translateMode)
             const actIdx = utils.lookupAction(settings.actions, translateMode)
             setAugmentPrompt(utils.getAssistantPrompt(settings.actions[actIdx]))
         })()
@@ -1155,7 +1159,7 @@ export function PopupCard(props: IPopupCardProps) {
                                                             translateText(originalText, originalAugment, selectedWord, signal)
                                                         }}
                                                         >
-                                                    <div>{"Re Genrate 🚀"}</div>
+                                                    <div>{"ReGenrate 🚀"}</div>
                                                     </div>
                                                     ) : (
                                                         <div

@@ -458,7 +458,7 @@ const defaultSettings:ISettings = {
     frequency_penalty: 1,
     presence_penalty: 1,
     autoTranslate: utils.defaultAutoTranslate,
-    defaultTranslateMode: 'translate',
+    defaultTranslateMode: '',
     defaultTargetLanguage: utils.defaultTargetLanguage,
     alwaysShowIcons: utils.defaultAlwaysShowIcons,
     hotkey: '',
