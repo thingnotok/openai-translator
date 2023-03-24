@@ -439,8 +439,6 @@ export function PopupCard(props: IPopupCardProps) {
 
             const settings = await getSettings()
             const actIdx = utils.lookupAction(settings.actions, translateMode)
-            console.log("tm2")
-            console.log(translateMode)
             if(actIdx > -1)
                 setAugmentPrompt(utils.getAssistantPrompt(settings.actions[actIdx]));
         })()
@@ -857,8 +855,6 @@ export function PopupCard(props: IPopupCardProps) {
         onClick={() => {
             const controller = new AbortController()
             const { signal } = controller
-            console.log("clicked")
-            console.log(translateMode)
             translateText(originalText, originalAugment, selectedWord, signal)
         }}
         ><div>{"Genrate 🚀"}</div></div>

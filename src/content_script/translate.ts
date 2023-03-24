@@ -42,7 +42,7 @@ export async function translate(query: TranslateQuery) {
         console.log("Bad Command")
         return
     }
-    console.log("Command")
+    console.log("Command:")
     console.log(settings.actions[mode])
     let systemPrompt = utils.getPrompt(settings.actions[mode])
     let assistantPrompt = utils.getAssistantPrompt(settings.actions[mode])
